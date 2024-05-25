@@ -70,7 +70,14 @@ dbs:
 ```
 
 * support 'in' query
-  select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+
+* template
+
+```yaml
+sql: select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+```
+
+* request
 
 ```json
 {

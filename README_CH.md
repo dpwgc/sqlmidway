@@ -70,13 +70,20 @@ dbs:
 ```
 
 * 支持in查询
-select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+
+* 模板
+
+```yaml
+sql: select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+```
+
+* 请求
 
 ```json
 {
-    "ids": [
-      1,
-      2
-    ]
+  "ids": [
+    1,
+    2
+  ]
 }
 ```
