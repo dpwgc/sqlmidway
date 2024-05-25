@@ -2,20 +2,20 @@ server:
   addr: 0.0.0.0
   port: 8899
   tls: false
-  certFile: cert.pem
+  cert-file: cert.pem
   key-file: private.key
 log:
   path: ./logs
-  max-size: 1
-  max-age: 7
-  max-backups: 1000
-db:
-  type: mysql
-  dsn: root:1234@tcp(127.0.0.1:3306)/small_scheduler?charset=utf8mb4&parseTime=True&loc=Local
-apis:
-  - service: task
-    method: list
-    sql: select * from task where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} limit {#size} {size} {/size}
-    params: name, id, size
-    lower-camel: true
-    debug: true
+  size: 1
+  age: 7
+  backups: 1000
+dbs:
+  - name: test_db
+    type: mysql
+    dsn: root:123456@tcp(127.0.0.1:3306)/test_db?charset=utf8mb4&parseTime=True&loc=Local
+    apis:
+      - service: test
+        method: list
+        sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}
+        lower-camel: true
+        debug: true

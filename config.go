@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 )
 
 type ConfigOptions struct {
 	Server ServerOptions `yaml:"server"`
 	Log    LogOptions    `yaml:"log"`
-	DB     DBOptions     `yaml:"db"`
-	APIs   []APIOptions  `yaml:"apis"`
+	DBs    []DBOptions   `yaml:"dbs"`
 }
 
 type ServerOptions struct {
@@ -23,26 +24,29 @@ type ServerOptions struct {
 }
 
 type LogOptions struct {
-	Path       string `yaml:"path"`
-	MaxSize    int    `yaml:"max-size"`
-	MaxAge     int    `yaml:"max-age"`
-	MaxBackups int    `yaml:"max-backups"`
+	Path    string `yaml:"path"`
+	Size    int    `yaml:"size"`
+	Age     int    `yaml:"age"`
+	Backups int    `yaml:"backups"`
 }
 
 type DBOptions struct {
-	Type string `yaml:"type"`
-	DSN  string `yaml:"dsn"`
+	Name string       `yaml:"name"`
+	Type string       `yaml:"type"`
+	DSN  string       `yaml:"dsn"`
+	APIs []APIOptions `yaml:"apis"`
 }
 
 type APIOptions struct {
 	Service    string `yaml:"service"`
 	Method     string `yaml:"method"`
 	Sql        string `yaml:"sql"`
-	Params     string `yaml:"params"`
 	LowerCamel bool   `yaml:"lower-camel"`
 	UpperCamel bool   `yaml:"upper-camel"`
 	Underscore bool   `yaml:"underscore"`
 	Debug      bool   `yaml:"debug"`
+	Params     []string
+	ORM        *ORM
 }
 
 var config ConfigOptions
@@ -65,4 +69,44 @@ func InitConfig() {
 		time.Sleep(3 * time.Second)
 		panic(err)
 	}
+	for _, db := range Config().DBs {
+		for i := 0; i < len(db.APIs); i++ {
+			db.APIs[i].Params = matchParams(db.APIs[i].Sql)
+		}
+	}
+}
+
+func matchParams(src string) []string {
+
+	reg := regexp.MustCompile("\\{(.*?)}")
+	arr := reg.FindAllString(src, -1)
+
+	var r []string
+	m := make(map[string]bool)
+	for _, v := range arr {
+		if strings.Contains(v, "{#") || strings.Contains(v, "{/") {
+			continue
+		}
+		v = strings.ReplaceAll(v, "{", "")
+		v = strings.ReplaceAll(v, "}", "")
+		if m[v] {
+			continue
+		}
+		r = append(r, v)
+		m[v] = true
+	}
+	for _, v := range arr {
+		if !strings.Contains(v, "{#") && !strings.Contains(v, "{/") {
+			continue
+		}
+		v = strings.ReplaceAll(v, "{#", "")
+		v = strings.ReplaceAll(v, "{/", "")
+		v = strings.ReplaceAll(v, "}", "")
+		if m[v] {
+			continue
+		}
+		r = append(r, v)
+		m[v] = true
+	}
+	return r
 }

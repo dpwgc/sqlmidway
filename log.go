@@ -12,9 +12,9 @@ func InitLog() {
 	r := &lumberjack.Logger{
 		Filename:   Config().Log.Path + "/runtime.log",
 		LocalTime:  true,
-		MaxSize:    Config().Log.MaxSize,
-		MaxAge:     Config().Log.MaxAge,
-		MaxBackups: Config().Log.MaxBackups,
+		MaxSize:    Config().Log.Size,
+		MaxAge:     Config().Log.Age,
+		MaxBackups: Config().Log.Backups,
 		Compress:   false,
 	}
 	Logger = slog.New(slog.NewTextHandler(r, &slog.HandlerOptions{

@@ -10,21 +10,22 @@ import (
 )
 
 type API struct {
-	orm   *ORM
 	route map[string]APIOptions
 }
 
 func NewAPI() (*API, error) {
-	orm, err := NewORM()
-	if err != nil {
-		return nil, err
-	}
 	route := make(map[string]APIOptions)
-	for _, api := range Config().APIs {
-		route[fmt.Sprintf("%s.%s", api.Service, api.Method)] = api
+	for _, db := range Config().DBs {
+		orm, err := NewORM(db)
+		if err != nil {
+			return nil, err
+		}
+		for i := 0; i < len(db.APIs); i++ {
+			db.APIs[i].ORM = orm
+			route[fmt.Sprintf("%s.%s.%s", db.Name, db.APIs[i].Service, db.APIs[i].Method)] = db.APIs[i]
+		}
 	}
 	return &API{
-		orm:   orm,
 		route: route,
 	}, nil
 }
@@ -41,54 +42,69 @@ type QueryReply struct {
 	Result []map[string]any `json:"result,omitempty"`
 }
 
+type InfoReply struct {
+	Result []map[string]any `json:"result,omitempty"`
+}
+
 type ErrorReply struct {
 	Error string `json:"error,omitempty"`
 }
 
 func (a *API) Query(ctx *easierweb.Context, request map[string]any) (*QueryReply, error) {
-	api := a.route[fmt.Sprintf("%s.%s", ctx.Path.Get("service"), ctx.Path.Get("method"))]
+	api := a.route[fmt.Sprintf("%s.%s.%s", ctx.Path.Get("db"), ctx.Path.Get("service"), ctx.Path.Get("method"))]
 	if len(api.Service) == 0 || len(api.Method) == 0 {
 		return nil, errors.New("not found")
 	}
 	sql := api.Sql
-	sql, args := a.handleSql(sql, request, strings.Split(strings.ReplaceAll(api.Params, " ", ""), ","))
-	rows, err := a.orm.Query(context.Background(), api, sql, args...)
+	sql, args := a.handleSql(sql, request, api.Params)
+	rows, err := api.ORM.Query(context.Background(), api, sql, args...)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("%v / sql: %s / args: %v", err, sql, args))
+	}
+	reply := &QueryReply{
+		Result: rows,
 	}
 	if api.Debug {
-		return &QueryReply{
-			Sql:    sql,
-			Args:   args,
-			Result: rows,
-		}, nil
+		reply.Sql = sql
+		reply.Args = args
 	}
-	return &QueryReply{
-		Result: rows,
-	}, nil
+	return reply, nil
 }
 
 func (a *API) Command(ctx *easierweb.Context, request map[string]any) (*CommandReply, error) {
-	api := a.route[fmt.Sprintf("%s.%s", ctx.Path.Get("service"), ctx.Path.Get("method"))]
+	api := a.route[fmt.Sprintf("%s.%s.%s", ctx.Path.Get("db"), ctx.Path.Get("service"), ctx.Path.Get("method"))]
 	if len(api.Service) == 0 || len(api.Method) == 0 {
 		return nil, errors.New("not found")
 	}
 	sql := api.Sql
-	sql, args := a.handleSql(sql, request, strings.Split(strings.ReplaceAll(api.Params, " ", ""), ","))
-	res, err := a.orm.Command(context.Background(), sql, args...)
+	sql, args := a.handleSql(sql, request, api.Params)
+	res, err := api.ORM.Command(context.Background(), sql, args...)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("%v / sql: %s / args: %v", err, sql, args))
+	}
+	reply := &CommandReply{
+		Result: res,
 	}
 	if api.Debug {
-		return &CommandReply{
-			Sql:    sql,
-			Args:   args,
-			Result: res,
-		}, nil
+		reply.Sql = sql
+		reply.Args = args
 	}
-	return &CommandReply{
-		Result: res,
-	}, nil
+	return reply, nil
+}
+
+func (a *API) Info(ctx *easierweb.Context) *InfoReply {
+	reply := &InfoReply{}
+	for _, db := range Config().DBs {
+		for _, api := range db.APIs {
+			reply.Result = append(reply.Result, map[string]any{
+				"db":      db.Name,
+				"service": api.Service,
+				"method":  api.Method,
+				"params":  api.Params,
+			})
+		}
+	}
+	return reply
 }
 
 func (a *API) Health(ctx *easierweb.Context) {
@@ -101,13 +117,22 @@ func (a *API) handleSql(sql string, request map[string]any, params []string) (st
 		value := request[field]
 		if value == nil {
 			sql = a.delStr(sql, fmt.Sprintf("{#%s}", field), fmt.Sprintf("{/%s}", field))
-		} else {
-			sql = strings.ReplaceAll(sql, fmt.Sprintf("{%s}", field), "?")
-			args = append(args, value)
-			sql = strings.ReplaceAll(sql, fmt.Sprintf("{#%s}", field), "")
-			sql = strings.ReplaceAll(sql, fmt.Sprintf("{/%s}", field), "")
 		}
 	}
+	for _, field := range params {
+		value := request[field]
+		if value == nil {
+			continue
+		}
+		f := fmt.Sprintf("{%s}", field)
+		if strings.Contains(sql, f) {
+			sql = strings.ReplaceAll(sql, f, "?")
+			args = append(args, value)
+		}
+		sql = strings.ReplaceAll(sql, fmt.Sprintf("{#%s}", field), "")
+		sql = strings.ReplaceAll(sql, fmt.Sprintf("{/%s}", field), "")
+	}
+	fmt.Println(sql, args)
 	return sql, args
 }
 

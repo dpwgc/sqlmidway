@@ -18,8 +18,8 @@ type ORM struct {
 	db *sql.DB
 }
 
-func NewORM() (*ORM, error) {
-	db, err := sql.Open(Config().DB.Type, Config().DB.DSN)
+func NewORM(cfg DBOptions) (*ORM, error) {
+	db, err := sql.Open(cfg.Type, cfg.DSN)
 	if err != nil {
 		return nil, err
 	}

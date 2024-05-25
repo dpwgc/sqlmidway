@@ -1,4 +1,4 @@
-module fast-data-api
+module sqlmidway
 
 go 1.21.4
 
