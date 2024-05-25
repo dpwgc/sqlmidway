@@ -143,7 +143,6 @@ func (a *API) handleSql(sql string, request map[string]any, params []string) (st
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{#%s}", field), "")
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{/%s}", field), "")
 	}
-	fmt.Println(sql, args)
 	return sql, args
 }
 
