@@ -69,12 +69,12 @@ dbs:
 }
 ```
 
-* support 'in' query
+#### support 'in' query
 
 * template
 
 ```yaml
-sql: select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+sql: select * from test where 0=0 {#ids} and id in {ids} {/ids} limit 100
 ```
 
 * request
