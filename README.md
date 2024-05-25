@@ -1,6 +1,6 @@
 # SqlMidway
 
-## A database gateway service that automatically implements HTTP create, delete, update and query API based on custom SQL template configurations. Similar to Elasticsearch search template.
+## A database gateway service that automatically implements HTTP CRUD API based on custom SQL template configurations. Similar to Elasticsearch search template.
 
 ***
 
