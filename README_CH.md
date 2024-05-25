@@ -68,3 +68,15 @@ dbs:
 	]
 }
 ```
+
+* 支持in查询
+select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+
+```json
+{
+    "ids": [
+      1,
+      2
+    ]
+}
+```

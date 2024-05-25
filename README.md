@@ -6,7 +6,7 @@
 
 ### A simple example
 
-* modify the dbs parameters in config.yaml to create a database connection named test_db and configure a query API for the database
+* modify the dbs parameters in config.yaml to create a database connection named 'test_db' and configure a query API for the database
 
 ```yaml
 # database information (multiple data sources can be configured)
@@ -66,5 +66,17 @@ dbs:
 			"updatedAt": "2024-01-28T02:08:41+08:00"
 		}
 	]
+}
+```
+
+* support 'in' query
+  select * from test where 0=0 {#ids} and id = {ids} {/ids} limit 100
+
+```json
+{
+    "ids": [
+      1,
+      2
+    ]
 }
 ```

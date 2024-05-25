@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dpwgc/easierweb"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -126,8 +127,18 @@ func (a *API) handleSql(sql string, request map[string]any, params []string) (st
 		}
 		f := fmt.Sprintf("{%s}", field)
 		if strings.Contains(sql, f) {
-			sql = strings.ReplaceAll(sql, f, "?")
-			args = append(args, value)
+			if reflect.TypeOf(value).Kind() == reflect.Slice {
+				var in []string
+				arr := value.([]any)
+				for _, item := range arr {
+					in = append(in, "?")
+					args = append(args, item)
+				}
+				sql = strings.ReplaceAll(sql, f, fmt.Sprintf("(%s)", strings.Join(in, ",")))
+			} else {
+				sql = strings.ReplaceAll(sql, f, "?")
+				args = append(args, value)
+			}
 		}
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{#%s}", field), "")
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{/%s}", field), "")
