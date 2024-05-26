@@ -22,12 +22,19 @@ type ConfigOptions struct {
 }
 
 type ServerOptions struct {
-	Addr     string `yaml:"addr"`
-	Port     int    `yaml:"port"`
-	TLS      bool   `yaml:"tls"`
-	CertFile string `yaml:"cert-file"`
-	KeyFile  string `yaml:"key-file"`
-	Debug    bool   `yaml:"debug"`
+	Addr     string           `yaml:"addr"`
+	Port     int              `yaml:"port"`
+	Auth     bool             `yaml:"auth"`
+	Accounts []AccountOptions `yaml:"accounts"`
+	TLS      bool             `yaml:"tls"`
+	CertFile string           `yaml:"cert-file"`
+	KeyFile  string           `yaml:"key-file"`
+	Debug    bool             `yaml:"debug"`
+}
+
+type AccountOptions struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type LogOptions struct {

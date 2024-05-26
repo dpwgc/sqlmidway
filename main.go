@@ -25,7 +25,7 @@ func main() {
 		RequestHandle:     requestHandle(),
 		ResponseHandle:    responseHandle(),
 		CloseConsolePrint: true,
-	}).Use(logMiddleware())
+	}).Use(middleware())
 
 	router.EasyPOST("/query/:db/:group/:api", api.Query)
 	router.EasyPOST("/command/:db/:group/:api", api.Command)
@@ -87,9 +87,41 @@ func responseHandle() easierweb.ResponseHandle {
 	}
 }
 
-func logMiddleware() easierweb.Handle {
+func middleware() easierweb.Handle {
 	return func(ctx *easierweb.Context) {
-		ctx.Next()
+
+		if Config().Server.Auth && ctx.Route != "/health" {
+			ok := false
+			for _, a := range Config().Server.Accounts {
+				if ctx.Header.Get("Username") == a.Username && ctx.Header.Get("Password") == a.Password {
+					ok = true
+					break
+				}
+				if ctx.Header.Get("username") == a.Username && ctx.Header.Get("password") == a.Password {
+					ok = true
+					break
+				}
+			}
+			if ok {
+				ctx.Next()
+			} else {
+				errStr := "authentication failed"
+				ctx.Logger.Error(errStr, slog.String("url", ctx.Request.URL.String()),
+					slog.String("client", ctx.Request.RemoteAddr),
+					slog.Any("header", ctx.Header))
+				ctx.WriteJSON(http.StatusForbidden, &ErrorReply{
+					Error: errStr,
+				})
+				ctx.Abort()
+			}
+		} else {
+			ctx.Next()
+		}
+
+		if ctx.Route == "/health" {
+			return
+		}
+
 		body := ""
 		sizeLimit := 1024 * 1024
 		if len(ctx.Body) > 0 {

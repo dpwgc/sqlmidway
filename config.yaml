@@ -2,9 +2,19 @@ server:
 
   addr: 0.0.0.0
   port: 8899
+
+  # if auth = true, the request header must carry 'Username' and 'Password'
+  auth: false
+  accounts:
+    - username: root
+      password: 123456
+
+  # https
   tls: false
   cert-file: cert.pem
   key-file: private.key
+
+  # console print
   debug: true
 
 log:
@@ -34,6 +44,6 @@ dbs:
           - name: listByIds
             sql: select * from test where id in {ids}
 
-          # API /command/testDB/testGroup/editNameById
+            # API /command/testDB/testGroup/editNameById
           - name: listByIds
             sql: update test set name = {name} where id = {id} limit 1

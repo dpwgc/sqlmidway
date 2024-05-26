@@ -14,7 +14,7 @@
 # database information (multiple database can be configured)
 dbs:
 
-    # database name (make sure it is unique)
+    # database name (custom, make sure it is unique)
   - name: testDB
     type: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/test_db?charset=utf8mb4&parseTime=True&loc=Local
@@ -22,7 +22,7 @@ dbs:
     # API group information (multiple group can be configured)
     groups:
       
-        # group name (make sure it is unique in the DB)
+        # group name (custom, make sure it is unique in the DB)
       - name: testGroup
         # returned field name is changed to lower camel (support: lowerCamel,upperCamel,underscore)
         format: lowerCamel
@@ -31,7 +31,7 @@ dbs:
         apis:
 
             # API (1): /query/testDB/testGroup/listByIdOrName
-            # API name (make sure it is unique in the group)
+            # API name (custom, make sure it is unique in the group)
           - name: listByIdOrName
             # sql template (similar to elasticsearch search template)
             sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}

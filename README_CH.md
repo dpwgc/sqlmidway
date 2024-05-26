@@ -14,7 +14,7 @@
 # 数据库信息（可配置多个）
 dbs:
 
-    # 数据库名称（确保唯一）
+    # 数据库名称（自定义，确保唯一）
   - name: testDB
     type: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/test_db?charset=utf8mb4&parseTime=True&loc=Local
@@ -22,7 +22,7 @@ dbs:
     # 接口分组信息（可配置多个）
     groups:
       
-        # 分组名称（确保在该数据库下唯一）
+        # 分组名称（自定义，确保在该数据库下唯一）
       - name: testGroup
         # 返回的字段名转为小驼峰 (支持大小驼峰及下划线: lowerCamel,upperCamel,underscore)
         format: lowerCamel
@@ -31,7 +31,7 @@ dbs:
         apis:
 
             # 第一个接口: /query/testDB/testGroup/listByIdOrName
-            # 接口名称（确保在该分组下唯一）
+            # 接口名称（自定义，确保在该分组下唯一）
           - name: listByIdOrName
             # SQL模板（类似ES查询模板）
             sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}
