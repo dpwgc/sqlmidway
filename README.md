@@ -8,7 +8,7 @@
 
 ### Quick start
 
-#### modify the 'dbs' parameters in 'config.yaml' to create a database connection named 'testDB' and configure two APIs for the database
+#### modify the 'dbs' parameters in 'config.yaml' to create a database connection named 'testDB' and configure three APIs for the database
 
 ```yaml
 # database information (multiple database can be configured)
@@ -26,8 +26,6 @@ dbs:
       - name: testGroup
         # returned field name is changed to lower camel (support: lowerCamel,upperCamel,underscore)
         format: lowerCamel
-        # debug mode, which returns the generated SQL statement when responding to the result
-        debug: true
 
         # API information (multiple API can be configured)
         apis:
@@ -41,11 +39,13 @@ dbs:
             # API (2): /query/testDB/testGroup/listByIds
           - name: listByIds
             sql: select * from test where id in {ids}
+
+            # API (3): /command/testDB/testGroup/editNameById
+          - name: listByIds
+            sql: update test set name = {name} where id = {id} limit 1
 ```
 
 #### Explanation of SQL template rules
-
-Similar to the Elasticsearch search template
 
 * for example, template: 'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
 * when the 'id' parameter is not specified, the statement '{#id} and id = {id} {/id}' will be eliminated at the time of execution
@@ -55,7 +55,7 @@ Similar to the Elasticsearch search template
 
 * launch main.go
 
-#### Access this API(1) (URI: /query/{db.name}/{group.name}/{api.name})
+#### Access this API(1) (Query URI: /query/{db.name}/{group.name}/{api.name}, insert/update/delete URI: /command/{db.name}/{group.name}/{api.name})
 
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
@@ -72,11 +72,6 @@ Similar to the Elasticsearch search template
 
 ```json
 {
-  "sql": "select * from test where 0=0  and name like ?    limit ? ",
-  "args": [
-    "%test%",
-    10
-  ],
   "result": [
     {
       "createdAt": "2023-12-09T16:12:31+08:00",
@@ -95,6 +90,25 @@ Similar to the Elasticsearch search template
       "updatedAt": "2024-01-28T02:08:41+08:00"
     }
   ]
+}
+```
+
+* if the request is a command request (with the /command/xxx/xxx/xxx/xxx api), the response structure is as follows:
+
+```json
+{
+  "result": {
+    "rowsAffected": 0,
+    "lastInsertId": 0
+  }
+}
+```
+
+* if the request is abnormal, an error message is returned, and the response structure is as follows:
+
+```json
+{
+  "error": "Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '{ids}' at line 1"
 }
 ```
 
@@ -176,3 +190,9 @@ sql: select * from test where id in {ids}
   ]
 }
 ```
+
+***
+
+## View the logs
+
+* /logs/runtime.log

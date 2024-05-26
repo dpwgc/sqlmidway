@@ -23,8 +23,9 @@ func main() {
 		ErrorHandle:       errorHandle(),
 		Logger:            Logger,
 		RequestHandle:     requestHandle(),
+		ResponseHandle:    responseHandle(),
 		CloseConsolePrint: true,
-	})
+	}).Use(logMiddleware())
 
 	router.EasyPOST("/query/:db/:group/:api", api.Query)
 	router.EasyPOST("/command/:db/:group/:api", api.Command)
@@ -45,7 +46,7 @@ func errorHandle() easierweb.ErrorHandle {
 		errStr := fmt.Sprintf("%v", err)
 		ctx.Logger.Error(errStr, slog.String("url", ctx.Request.URL.String()),
 			slog.String("client", ctx.Request.RemoteAddr),
-			slog.String("request", string(ctx.Body)))
+			slog.String("body", string(ctx.Body)))
 		ctx.WriteJSON(http.StatusBadRequest, ErrorReply{
 			Error: errStr,
 		})
@@ -62,5 +63,44 @@ func requestHandle() easierweb.RequestHandle {
 			}
 		}
 		return nil
+	}
+}
+
+func responseHandle() easierweb.ResponseHandle {
+	return func(ctx *easierweb.Context, result any, err error) {
+		if err != nil {
+			if result != nil {
+				errStr := fmt.Sprintf("%v", err)
+				ctx.Logger.Error(errStr, slog.String("url", ctx.Request.URL.String()),
+					slog.String("client", ctx.Request.RemoteAddr),
+					slog.String("body", string(ctx.Body)))
+				ctx.WriteJSON(http.StatusBadRequest, result)
+				return
+			}
+			panic(err)
+		}
+		if result == nil {
+			ctx.NoContent(http.StatusNoContent)
+			return
+		}
+		ctx.WriteJSON(http.StatusOK, result)
+	}
+}
+
+func logMiddleware() easierweb.Handle {
+	return func(ctx *easierweb.Context) {
+		ctx.Next()
+		body := ""
+		sizeLimit := 1024 * 1024
+		if len(ctx.Body) > 0 {
+			if len(ctx.Body) > sizeLimit {
+				body = "body is too large"
+			} else {
+				body = string(ctx.Body)
+			}
+		}
+		ctx.Logger.Info(fmt.Sprintf("%s -> %s", ctx.Request.RemoteAddr, ctx.Request.URL.String()),
+			slog.String("body", body),
+			slog.Int("code", ctx.Code))
 	}
 }

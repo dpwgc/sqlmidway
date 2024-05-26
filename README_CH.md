@@ -8,7 +8,7 @@
 
 ### 快速开始
 
-#### 修改config.yaml中的dbs参数，新建一个名为testDB的数据库连接，并为其配置两个查询接口
+#### 修改config.yaml中的dbs参数，新建一个名为testDB的数据库连接，并为其配置三个接口
 
 ```yaml
 # 数据库信息（可配置多个）
@@ -26,8 +26,6 @@ dbs:
       - name: testGroup
         # 返回的字段名转为小驼峰 (支持大小驼峰及下划线: lowerCamel,upperCamel,underscore)
         format: lowerCamel
-        # debug模式，响应结果时返回生成的SQL语句
-        debug: true
 
         # 接口信息（可配置多个）
         apis:
@@ -41,11 +39,13 @@ dbs:
             # 第二个接口: /query/testDB/testGroup/listByIds
           - name: listByIds
             sql: select * from test where id in {ids}
+            
+            # 第三个接口: /command/testDB/testGroup/editNameById
+          - name: listByIds
+            sql: update test set name = {name} where id = {id} limit 1
 ```
 
 #### SQL模板规则解释
-
-近似于Elasticsearch查询模板
 
 * 例如模板：'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
 * 当id参数未传入时，'{#id} and id = {id} {/id}' 这一语句会在执行时被剔除
@@ -55,7 +55,7 @@ dbs:
 
 * 运行 main.go
 
-#### 访问第一个HTTP接口（接口路径：/query/{db.name}/{group.name}/{api.name}）
+#### 访问第一个HTTP接口（查询接口路径：/query/{db.name}/{group.name}/{api.name}，插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}）
 
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
@@ -72,11 +72,6 @@ dbs:
 
 ```json
 {
-  "sql": "select * from test where 0=0  and name like ?    limit ? ",
-  "args": [
-    "%test%",
-    10
-  ],
   "result": [
     {
       "createdAt": "2023-12-09T16:12:31+08:00",
@@ -95,6 +90,25 @@ dbs:
       "updatedAt": "2024-01-28T02:08:41+08:00"
     }
   ]
+}
+```
+
+* 如果这个请求是个写入性请求（调用了/command/xxx/xxx/xxx接口），则响应结构如下
+
+```json
+{
+  "result": {
+    "rowsAffected": 0,
+    "lastInsertId": 0
+  }
+}
+```
+
+* 如果请求异常，会响应报错信息，响应结构如下
+
+```json
+{
+  "error": "Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '{ids}' at line 1"
 }
 ```
 
@@ -176,3 +190,9 @@ sql: select * from test where id in {ids}
   ]
 }
 ```
+
+***
+
+## 查看日志
+
+* /logs/runtime.log

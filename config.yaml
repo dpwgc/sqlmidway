@@ -5,6 +5,7 @@ server:
   tls: false
   cert-file: cert.pem
   key-file: private.key
+  debug: true
 
 log:
 
@@ -23,7 +24,6 @@ dbs:
 
       - name: testGroup
         format: lowerCamel
-        debug: true
         apis:
 
             # API /query/testDB/testGroup/listByIdOrName
@@ -33,3 +33,7 @@ dbs:
             # API /query/testDB/testGroup/listByIds
           - name: listByIds
             sql: select * from test where id in {ids}
+
+          # API /command/testDB/testGroup/editNameById
+          - name: listByIds
+            sql: update test set name = {name} where id = {id} limit 1

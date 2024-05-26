@@ -34,15 +34,11 @@ func NewAPI() (*API, error) {
 }
 
 type CommandReply struct {
-	Sql    string           `json:"sql,omitempty"`
-	Args   []any            `json:"args,omitempty"`
 	Result map[string]int64 `json:"result,omitempty"`
 	Error  string           `json:"error,omitempty"`
 }
 
 type QueryReply struct {
-	Sql    string           `json:"sql,omitempty"`
-	Args   []any            `json:"args,omitempty"`
 	Result []map[string]any `json:"result,omitempty"`
 	Error  string           `json:"error,omitempty"`
 }
@@ -75,15 +71,10 @@ func (a *API) Query(ctx *easierweb.Context, request map[string]any) (*QueryReply
 	sql := api.Sql
 	sql, args := a.handleSql(sql, request, api.Params)
 	rows, err := api.Store.Query(context.Background(), api, sql, args...)
-	reply := &QueryReply{
+	return &QueryReply{
 		Error:  errorToString(err),
 		Result: rows,
-	}
-	if api.Debug {
-		reply.Sql = sql
-		reply.Args = args
-	}
-	return reply, err
+	}, err
 }
 
 func (a *API) Command(ctx *easierweb.Context, request map[string]any) (*CommandReply, error) {
@@ -94,15 +85,10 @@ func (a *API) Command(ctx *easierweb.Context, request map[string]any) (*CommandR
 	sql := api.Sql
 	sql, args := a.handleSql(sql, request, api.Params)
 	res, err := api.Store.Command(context.Background(), sql, args...)
-	reply := &CommandReply{
+	return &CommandReply{
 		Error:  errorToString(err),
 		Result: res,
-	}
-	if api.Debug {
-		reply.Sql = sql
-		reply.Args = args
-	}
-	return reply, err
+	}, err
 }
 
 func (a *API) Info(ctx *easierweb.Context) *InfoReply {
@@ -156,6 +142,9 @@ func (a *API) handleSql(sql string, request map[string]any, params []string) (st
 		}
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{#%s}", field), "")
 		sql = strings.ReplaceAll(sql, fmt.Sprintf("{/%s}", field), "")
+	}
+	if Config().Server.Debug {
+		fmt.Println("[DEBUG]", "REQ:", request, "/", "SQL:", sql, "/", "ARGS:", args)
 	}
 	return sql, args
 }

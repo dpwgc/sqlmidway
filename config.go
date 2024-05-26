@@ -27,6 +27,7 @@ type ServerOptions struct {
 	TLS      bool   `yaml:"tls"`
 	CertFile string `yaml:"cert-file"`
 	KeyFile  string `yaml:"key-file"`
+	Debug    bool   `yaml:"debug"`
 }
 
 type LogOptions struct {
@@ -40,23 +41,22 @@ type DBOptions struct {
 	Name   string         `yaml:"name"`
 	Type   string         `yaml:"type"`
 	DSN    string         `yaml:"dsn"`
+	Format string         `yaml:"format"`
 	Groups []GroupOptions `yaml:"groups"`
 }
 
 type GroupOptions struct {
 	Name   string       `yaml:"name"`
 	Format string       `yaml:"format"`
-	Debug  bool         `yaml:"debug"`
 	APIs   []APIOptions `yaml:"apis"`
 }
 
 type APIOptions struct {
 	Name   string `yaml:"name"`
 	Sql    string `yaml:"sql"`
+	Format string `yaml:"format"`
 	Hide   []string
 	Show   []string
-	Format string
-	Debug  bool
 	Params []string
 	Store  *Store
 }
@@ -85,8 +85,28 @@ func InitConfig() {
 		for i := 0; i < len(db.Groups); i++ {
 			for j := 0; j < len(db.Groups[i].APIs); j++ {
 				db.Groups[i].APIs[j].Params = matchParams(db.Groups[i].APIs[j].Sql)
-				db.Groups[i].APIs[j].Format = db.Groups[i].Format
-				db.Groups[i].APIs[j].Debug = db.Groups[i].Debug
+				if len(db.Groups[i].APIs[j].Format) > 0 {
+					continue
+				}
+				if len(db.Groups[i].Format) > 0 {
+					db.Groups[i].APIs[j].Format = db.Groups[i].Format
+					continue
+				}
+				db.Groups[i].APIs[j].Format = db.Format
+			}
+		}
+	}
+	if Config().Server.Debug {
+		for _, db := range Config().DBs {
+			fmt.Println("[DEBUG]", "> DB:", db.Name)
+			for _, group := range db.Groups {
+				fmt.Println("[DEBUG]", ">>> GROUP:", group.Name)
+				for _, api := range group.APIs {
+					fmt.Println("[DEBUG]", ">>>>> API:", api.Name)
+					fmt.Println("[DEBUG]", ">>>>>>> URI:", fmt.Sprintf("/%s/%s/%s", db.Name, group.Name, api.Name))
+					fmt.Println("[DEBUG]", ">>>>>>> SQL:", api.Sql)
+					fmt.Println("[DEBUG]", ">>>>>>> PARAMS:", api.Params)
+				}
 			}
 		}
 	}
