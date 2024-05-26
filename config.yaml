@@ -45,5 +45,5 @@ dbs:
             sql: select * from test where id in {ids}
 
             # API /command/testDB/testGroup/editNameById
-          - name: listByIds
+          - name: editNameById
             sql: update test set name = {name} where id = {id} limit 1

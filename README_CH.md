@@ -74,7 +74,7 @@ select * from test where 0=0 and id = ?
 
 #### 访问第一个HTTP接口
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
 `查询接口路径：/query/{db.name}/{group.name}/{api.name}`
 `插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}`
@@ -138,7 +138,7 @@ select * from test where 0=0 and id = ?
 
 #### 不返回id和name字段（URI中传入hide参数）
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?hide=id,name
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?hide=id,name
 
 * 请求
 
@@ -165,7 +165,7 @@ select * from test where 0=0 and id = ?
 
 #### 将返回字段的格式设为大驼峰, 只返回Id和Name字段（URI中传入format和show参数）
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
 
 * 请求
 
@@ -216,3 +216,11 @@ sql: select * from test where id in {ids}
 ## 查看日志
 
 * /logs/runtime.log
+
+***
+
+## 其他接口
+
+> `GET` http://127.0.0.1:8899/info
+
+> `GET` http://127.0.0.1:8899/health

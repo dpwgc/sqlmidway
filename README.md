@@ -74,7 +74,7 @@ select * from test where 0=0 and id = ?
 
 #### Access the API (1) 
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
 `select URI: /query/{db.name}/{group.name}/{api.name}` `insert/update/delete URI: /command/{db.name}/{group.name}/{api.name}`
 
@@ -137,7 +137,7 @@ select * from test where 0=0 and id = ?
 
 #### Hide the 'id' and 'name' fields (URI with 'hide' parameter)
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?hide=id,name
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?hide=id,name
 
 * request
 
@@ -164,7 +164,7 @@ select * from test where 0=0 and id = ?
 
 #### Format the return field as upper camel, only the 'Id' and 'Name' fields are returned (URI with 'format' and 'shaw' parameters)
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
+> `POST` http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
 
 * request
 
@@ -215,3 +215,11 @@ sql: select * from test where id in {ids}
 ## View the logs
 
 * /logs/runtime.log
+
+***
+
+## Other APIs
+
+> `GET` http://127.0.0.1:8899/info
+
+> `GET` http://127.0.0.1:8899/health
