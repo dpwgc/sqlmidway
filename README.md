@@ -74,9 +74,9 @@ select * from test where 0=0 and id = ?
 
 #### Access the API (1) 
 
-`select URI: /query/{db.name}/{group.name}/{api.name}` `insert/update/delete URI: /command/{db.name}/{group.name}/{api.name}`
-
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
+
+`select URI: /query/{db.name}/{group.name}/{api.name}` `insert/update/delete URI: /command/{db.name}/{group.name}/{api.name}`
 
 * request
 
