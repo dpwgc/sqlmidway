@@ -74,9 +74,10 @@ select * from test where 0=0 and id = ?
 
 #### 访问第一个HTTP接口
 
-查询接口路径：/query/{db.name}/{group.name}/{api.name}，插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}
-
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
+
+`查询接口路径：/query/{db.name}/{group.name}/{api.name}`
+`插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}`
 
 * 请求
 
