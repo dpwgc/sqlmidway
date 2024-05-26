@@ -8,21 +8,21 @@
 
 ### Quick start
 
-#### modify the dbs parameters in 'config.yaml' to create a database connection named 'testDB' and configure two APIs for the database
+#### modify the 'dbs' parameters in 'config.yaml' to create a database connection named 'testDB' and configure two APIs for the database
 
 ```yaml
 # database information (multiple database can be configured)
 dbs:
 
-    # DB Name (make sure it is unique)
+    # database name (make sure it is unique)
   - name: testDB
     type: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/test_db?charset=utf8mb4&parseTime=True&loc=Local
 
-    # API Group information (multiple group can be configured)
+    # API group information (multiple group can be configured)
     groups:
       
-        # Group Name (make sure it is unique in the DB)
+        # group name (make sure it is unique in the DB)
       - name: testGroup
         # returned field name is changed to lower camel (support: lowerCamel,upperCamel,underscore)
         format: lowerCamel
@@ -32,13 +32,13 @@ dbs:
         # API information (multiple API can be configured)
         apis:
 
-            # API(1): /query/testDB/testGroup/listByIdOrName
-            # API Name (make sure it is unique in the group)
+            # API (1): /query/testDB/testGroup/listByIdOrName
+            # API name (make sure it is unique in the group)
           - name: listByIdOrName
             # sql template (similar to elasticsearch search template)
             sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}
 
-            # API(2): /query/testDB/testGroup/listByIds
+            # API (2): /query/testDB/testGroup/listByIds
           - name: listByIds
             sql: select * from test where id in {ids}
 ```
@@ -47,15 +47,15 @@ dbs:
 
 Similar to the Elasticsearch search template
 
-* For example, template: 'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
-* When the 'id' parameter is not specified, the statement '{#id} and id = {id} {/id}' will be eliminated at the time of execution
-* When 'id' is passed in but 'name' is not passed, the SQL statement is generated as follows: 'select * from test where 0=0 and id = ?'
+* for example, template: 'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
+* when the 'id' parameter is not specified, the statement '{#id} and id = {id} {/id}' will be eliminated at the time of execution
+* when 'id' is passed in but 'name' is not passed, the SQL statement is generated as follows: 'select * from test where 0=0 and id = ?'
 
 #### Start the project
 
 * launch main.go
 
-#### access this API(1) (URI: /query/{db.name}/{group.name}/{api.name})
+#### Access this API(1) (URI: /query/{db.name}/{group.name}/{api.name})
 
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
@@ -100,7 +100,7 @@ Similar to the Elasticsearch search template
 
 ***
 
-### Control field returns (like graphql)
+### Control field returns (like Graphql)
 
 #### Hide the 'id' and 'name' fields (URI with 'hide' parameter)
 
@@ -131,7 +131,7 @@ Similar to the Elasticsearch search template
 
 #### Format the return field as upper camel, only the 'Id' and 'Name' fields are returned (URI with 'format' and 'shaw' parameters)
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel
+> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
 
 * request
 
@@ -158,7 +158,7 @@ Similar to the Elasticsearch search template
 
 ### Support 'in' query
 
-#### pass in the array parameters
+#### Pass in the array parameters
 
 * sql template
 

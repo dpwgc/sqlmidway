@@ -131,7 +131,7 @@ dbs:
 
 #### 将返回字段的格式设为大驼峰, 只返回Id和Name字段（URI中传入format和show参数）
 
-> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel
+> http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName?format=upperCamel&show=Id,Name
 
 * 请求
 
