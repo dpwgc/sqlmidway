@@ -52,7 +52,7 @@ dbs:
             sql: select * from test where id in {ids}
 
             # API (3): /command/testDB/testGroup/editNameById
-          - name: listByIds
+          - name: editNameById
             sql: update test set name = {name} where id = {id} limit 1
 ```
 
@@ -218,7 +218,17 @@ sql: select * from test where id in {ids}
 
 ***
 
-## Other APIs
+## APIs
+
+`SELECT`
+
+> `POST` http://127.0.0.1:8899/query/{db.name}/{group.name}/{api.name}
+
+`INSERT` `UPDATE` `DELETE`
+
+> `POST` http://127.0.0.1:8899/command/{db.name}/{group.name}/{api.name}
+
+`OTHER`
 
 > `GET` http://127.0.0.1:8899/info
 
