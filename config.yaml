@@ -1,21 +1,35 @@
 server:
+
   addr: 0.0.0.0
   port: 8899
   tls: false
   cert-file: cert.pem
   key-file: private.key
+
 log:
+
   path: ./logs
   size: 1
   age: 7
   backups: 1000
+
 dbs:
-  - name: test_db
+
+  - name: testDB
     type: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/test_db?charset=utf8mb4&parseTime=True&loc=Local
-    apis:
-      - service: test
-        method: list
-        sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}
-        lower-camel: true
+
+    groups:
+
+      - name: testGroup
+        format: lowerCamel
         debug: true
+        apis:
+
+            # API /query/testDB/testGroup/listByIdOrName
+          - name: listByIdOrName
+            sql: select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id} {#size} limit {size} {/size}
+
+            # API /query/testDB/testGroup/listByIds
+          - name: listByIds
+            sql: select * from test where id in {ids}

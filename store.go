@@ -11,24 +11,25 @@ import (
 	_ "gorm.io/driver/postgres"
 	_ "gorm.io/driver/sqlserver"
 	"regexp"
+	"slices"
 	"strings"
 )
 
-type ORM struct {
+type Store struct {
 	db *sql.DB
 }
 
-func NewORM(cfg DBOptions) (*ORM, error) {
+func NewStore(cfg DBOptions) (*Store, error) {
 	db, err := sql.Open(cfg.Type, cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
-	return &ORM{
+	return &Store{
 		db: db,
 	}, nil
 }
 
-func (c *ORM) Command(ctx context.Context, sql string, args ...any) (map[string]int64, error) {
+func (c *Store) Command(ctx context.Context, sql string, args ...any) (map[string]int64, error) {
 	result, err := c.db.Exec(sql, args...)
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func (c *ORM) Command(ctx context.Context, sql string, args ...any) (map[string]
 	}, nil
 }
 
-func (c *ORM) Query(ctx context.Context, api APIOptions, sql string, args ...any) ([]map[string]any, error) {
+func (c *Store) Query(ctx context.Context, api APIOptions, sql string, args ...any) ([]map[string]any, error) {
 	rows, err := c.db.Query(sql, args...)
 	if err != nil {
 		return nil, err
@@ -61,11 +62,11 @@ func (c *ORM) Query(ctx context.Context, api APIOptions, sql string, args ...any
 	var newColumns []string
 
 	for _, col := range columns {
-		if api.LowerCamel {
+		if api.Format == LowerCamel {
 			newColumns = append(newColumns, toCamelCase(col, false))
-		} else if api.UpperCamel {
+		} else if api.Format == UpperCamel {
 			newColumns = append(newColumns, toCamelCase(col, true))
-		} else if api.Underscore {
+		} else if api.Format == Underscore {
 			newColumns = append(newColumns, toUnderscore(col))
 		} else {
 			newColumns = append(newColumns, col)
@@ -92,6 +93,12 @@ func (c *ORM) Query(ctx context.Context, api APIOptions, sql string, args ...any
 		}
 		item := make(map[string]any)
 		for i, col := range newColumns {
+			if len(api.Show) > 0 && !slices.Contains(api.Show, col) {
+				continue
+			}
+			if len(api.Hide) > 0 && slices.Contains(api.Hide, col) {
+				continue
+			}
 			var v any
 			val := values[i]
 			b, ok := val.([]byte)

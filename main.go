@@ -26,8 +26,8 @@ func main() {
 		CloseConsolePrint: true,
 	})
 
-	router.EasyPOST("/query/:db/:service/:method", api.Query)
-	router.EasyPOST("/command/:db/:service/:method", api.Command)
+	router.EasyPOST("/query/:db/:group/:api", api.Query)
+	router.EasyPOST("/command/:db/:group/:api", api.Command)
 	router.EasyGET("/info", api.Info)
 	router.EasyGET("/health", api.Health)
 

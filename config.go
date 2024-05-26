@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+const (
+	LowerCamel = "lowerCamel"
+	UpperCamel = "upperCamel"
+	Underscore = "underscore"
+)
+
 type ConfigOptions struct {
 	Server ServerOptions `yaml:"server"`
 	Log    LogOptions    `yaml:"log"`
@@ -31,22 +37,28 @@ type LogOptions struct {
 }
 
 type DBOptions struct {
-	Name string       `yaml:"name"`
-	Type string       `yaml:"type"`
-	DSN  string       `yaml:"dsn"`
-	APIs []APIOptions `yaml:"apis"`
+	Name   string         `yaml:"name"`
+	Type   string         `yaml:"type"`
+	DSN    string         `yaml:"dsn"`
+	Groups []GroupOptions `yaml:"groups"`
+}
+
+type GroupOptions struct {
+	Name   string       `yaml:"name"`
+	Format string       `yaml:"format"`
+	Debug  bool         `yaml:"debug"`
+	APIs   []APIOptions `yaml:"apis"`
 }
 
 type APIOptions struct {
-	Service    string `yaml:"service"`
-	Method     string `yaml:"method"`
-	Sql        string `yaml:"sql"`
-	LowerCamel bool   `yaml:"lower-camel"`
-	UpperCamel bool   `yaml:"upper-camel"`
-	Underscore bool   `yaml:"underscore"`
-	Debug      bool   `yaml:"debug"`
-	Params     []string
-	ORM        *ORM
+	Name   string `yaml:"name"`
+	Sql    string `yaml:"sql"`
+	Hide   []string
+	Show   []string
+	Format string
+	Debug  bool
+	Params []string
+	Store  *Store
 }
 
 var config ConfigOptions
@@ -70,8 +82,12 @@ func InitConfig() {
 		panic(err)
 	}
 	for _, db := range Config().DBs {
-		for i := 0; i < len(db.APIs); i++ {
-			db.APIs[i].Params = matchParams(db.APIs[i].Sql)
+		for i := 0; i < len(db.Groups); i++ {
+			for j := 0; j < len(db.Groups[i].APIs); j++ {
+				db.Groups[i].APIs[j].Params = matchParams(db.Groups[i].APIs[j].Sql)
+				db.Groups[i].APIs[j].Format = db.Groups[i].Format
+				db.Groups[i].APIs[j].Debug = db.Groups[i].Debug
+			}
 		}
 	}
 }
