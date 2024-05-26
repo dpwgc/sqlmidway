@@ -1,6 +1,7 @@
 # SqlMidway
 
-### A database gateway that automatically implements HTTP CRUD API based on SQL template configurations. Similar to Elasticsearch search template.
+### A database gateway that automatically implements HTTP CRUD API based on SQL template configurations. 
+### Similar to Elasticsearch search template.
 
 ***
 
