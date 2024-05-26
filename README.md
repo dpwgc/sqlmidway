@@ -47,15 +47,23 @@ dbs:
 
 #### Explanation of SQL template rules
 
-* for example, template: 'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
+* for example, template: 
+```
+select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}
+```
 * when the 'id' parameter is not specified, the statement '{#id} and id = {id} {/id}' will be eliminated at the time of execution
-* when 'id' is passed in but 'name' is not passed, the SQL statement is generated as follows: 'select * from test where 0=0 and id = ?'
+* when 'id' is passed in but 'name' is not passed, the SQL statement is generated as follows: 
+```
+select * from test where 0=0 and id = ?
+```
 
 #### Start the project
 
 * launch main.go
 
-#### Access this API(1) (Query URI: /query/{db.name}/{group.name}/{api.name}, insert/update/delete URI: /command/{db.name}/{group.name}/{api.name})
+#### Access this API (1) 
+
+select URI: /query/{db.name}/{group.name}/{api.name}, insert/update/delete URI: /command/{db.name}/{group.name}/{api.name}
 
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 

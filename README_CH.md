@@ -47,15 +47,23 @@ dbs:
 
 #### SQL模板规则解释
 
-* 例如模板：'select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}'
+* 例如模板：
+```
+select * from test where 0=0 {#name} and name like {name} {/name} {#id} and id = {id} {/id}
+```
 * 当id参数未传入时，'{#id} and id = {id} {/id}' 这一语句会在执行时被剔除
-* 当id传入，name未传入时，则生成的SQL语句为：'select * from test where 0=0 and id = ?'
+* 当id传入，name未传入时，则生成的SQL语句为：
+```
+select * from test where 0=0 and id = ?
+```
 
 #### 启动项目
 
 * 运行 main.go
 
-#### 访问第一个HTTP接口（查询接口路径：/query/{db.name}/{group.name}/{api.name}，插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}）
+#### 访问第一个HTTP接口
+
+查询接口路径：/query/{db.name}/{group.name}/{api.name}，插入/更新/删除接口路径：/command/{db.name}/{group.name}/{api.name}
 
 > http://127.0.0.1:8899/query/testDB/testGroup/listByIdOrName
 
