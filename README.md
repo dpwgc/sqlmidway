@@ -4,6 +4,16 @@
 
 ***
 
+## Features
+
+* SQL statements can be automatically generated and executed based on SQL template + JSON request parameters, and return JSON result.
+* customize the format and number of response fields ('convert to underscore/lowerCamel/upperCamel', 'do not return specified fields', 'only return specified fields').
+* use parameterized queries to prevent SQL injection, it can be used to quickly build small server-side projects.
+
+![img](./img.jpg)
+
+***
+
 ## How to use
 
 ### Quick start
